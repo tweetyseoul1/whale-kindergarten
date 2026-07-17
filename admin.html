@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>웨일어린이집 · 관리자 페이지</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root{
+    --blue:#1E6BD6; --blue-deep:#134A99; --sky:#EAF4FC; --sky-soft:#F5FAFE;
+    --wave:#CFE7F7; --coral:#F2856D; --ink:#1F2A37; --ink-soft:#5D6B7A;
+    --card:#FFFFFF; --bg:#F7FAFD; --line:#E3EBF3;
+    --shadow:0 10px 28px rgba(30,107,214,.10);
+    --ok:#2E9E5B; --warn:#D9534F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --blue:#6FAFF0; --blue-deep:#9CC7F5; --sky:#12202E; --sky-soft:#0F1B26;
+      --wave:#173042; --coral:#F79A85; --ink:#E9F1F8; --ink-soft:#9DB0C2;
+      --card:#16283A; --bg:#0C1722; --line:#243A4E;
+      --shadow:0 10px 28px rgba(0,0,0,.35);
+      --ok:#5BC98A; --warn:#F08A87;
+    }
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; padding-bottom:60px;
+  }
+  a{color:var(--blue)}
+  button{font-family:inherit; cursor:pointer}
+
+  header{
+    background:var(--card); border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:20;
+  }
+  .head-in{
+    max-width:1000px; margin:0 auto; padding:14px 20px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .head-in h1{font-size:1.15rem; color:var(--blue); display:flex; align-items:center; gap:8px}
+  .head-in .badge{
+    font-size:.72rem; font-weight:700; letter-spacing:.08em; color:#fff;
+    background:var(--coral); border-radius:999px; padding:3px 10px;
+  }
+  .head-in .to-site{
+    margin-left:auto; text-decoration:none; font-weight:700; font-size:.9rem;
+    background:var(--sky); color:var(--blue); padding:8px 16px; border-radius:999px;
+  }
+
+  .wrap{max-width:1000px; margin:0 auto; padding:24px 20px}
+  .notice{
+    background:var(--sky); border:1px solid var(--wave); border-radius:16px;
+    padding:16px 18px; font-size:.9rem; color:var(--ink-soft); margin-bottom:22px;
+  }
+  .notice strong{color:var(--ink)}
+  .notice ol{margin:8px 0 0 20px; display:grid; gap:4px}
+
+  .usage{
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+    font-size:.85rem; color:var(--ink-soft); flex-wrap:wrap;
+  }
+  .usage .bar{
+    flex:1 1 160px; height:8px; border-radius:999px; background:var(--line); overflow:hidden;
+  }
+  .usage .bar i{display:block; height:100%; background:var(--blue); border-radius:999px; transition:width .3s}
+
+  .slot-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px}
+  .slot{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column;
+  }
+  .slot .preview{
+    aspect-ratio:16/10; background:
+      repeating-conic-gradient(var(--sky) 0% 25%, var(--card) 0% 50%) 0 0 / 24px 24px;
+    position:relative; display:flex; align-items:center; justify-content:center;
+  }
+  .slot .preview img{width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0}
+  .slot .preview .empty{
+    position:relative; z-index:1; text-align:center; color:var(--ink-soft);
+    font-size:.83rem; padding:12px; background:color-mix(in srgb, var(--card) 88%, transparent);
+    border-radius:12px; border:1px dashed var(--line); margin:14px;
+  }
+  .slot .preview .tag{
+    position:absolute; top:10px; left:10px; z-index:2;
+    font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:999px; color:#fff;
+  }
+  .tag.custom{background:var(--ok)}
+  .tag.default{background:var(--ink-soft)}
+
+  .slot .body{padding:16px 16px 18px; display:grid; gap:10px}
+  .slot h2{font-size:1rem}
+  .slot .where{font-size:.82rem; color:var(--ink-soft)}
+  .slot .file-key{
+    font-size:.72rem; color:var(--ink-soft); background:var(--sky-soft);
+    border:1px solid var(--line); border-radius:8px; padding:4px 8px; width:fit-content;
+    font-family:Consolas,monospace;
+  }
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border-radius:999px; border:0; font-weight:700; font-size:.85rem;
+    padding:9px 16px; text-decoration:none; transition:transform .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:focus-visible{outline:3px solid var(--coral); outline-offset:2px}
+  .btn-blue{background:var(--blue); color:#fff}
+  .btn-line{background:var(--card); color:var(--blue); border:1.5px solid var(--blue)}
+  .btn-ghost{background:var(--sky); color:var(--ink-soft)}
+  .btn[disabled]{opacity:.4; cursor:default; transform:none}
+  input[type=file]{display:none}
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(90px);
+    background:var(--ink); color:var(--bg); padding:12px 22px; border-radius:999px;
+    font-size:.9rem; font-weight:600; box-shadow:0 14px 34px rgba(0,0,0,.28);
+    transition:transform .25s ease; z-index:50; max-width:90vw; text-align:center;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <h1>🐋 웨일어린이집 <span class="badge">관리자</span></h1>
+    <a class="to-site" href="whale-kindergarten.html">홈페이지 보기 →</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="notice">
+    <strong>📌 이미지 교체 방법</strong>
+    <ol>
+      <li>바꾸고 싶은 자리의 <strong>[이미지 올리기]</strong>를 눌러 사진을 선택하면 <strong>즉시 홈페이지에 반영</strong>됩니다. (이 브라우저 기준)</li>
+      <li>모든 기기·방문자에게 적용하려면 <strong>[파일로 저장]</strong>으로 내려받은 파일을 홈페이지의 <strong>images 폴더</strong>에 넣어 주세요. (파일 이름 그대로)</li>
+      <li><strong>[기본으로 되돌리기]</strong>를 누르면 올린 이미지가 삭제되고 images 폴더의 원본 이미지로 돌아갑니다.</li>
+    </ol>
+  </div>
+
+  <div class="usage">
+    <span>브라우저 저장 공간 사용량</span>
+    <div class="bar"><i id="usageBar" style="width:0%"></i></div>
+    <span id="usageText">0 / 약 5MB</span>
+  </div>
+
+  <div class="slot-grid" id="slotGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // 홈페이지의 이미지 자리 목록 (data-key와 1:1 대응)
+  const SLOTS = [
+    { key:'hero-kids',     name:'① 메인 대표 사진',   where:'첫 화면 오른쪽 큰 사진 (아이들 단체 사진)' },
+    { key:'prog-language', name:'② 언어놀이 사진',    where:'2번 화면 · 다양한 프로그램 첫 번째 카드' },
+    { key:'prog-art',      name:'③ 미술활동 사진',    where:'2번 화면 · 다양한 프로그램 두 번째 카드' },
+    { key:'prog-outdoor',  name:'④ 바깥놀이 사진',    where:'2번 화면 · 다양한 프로그램 세 번째 카드' },
+    { key:'prog-sensory',  name:'⑤ 감각놀이 사진',    where:'2번 화면 · 다양한 프로그램 네 번째 카드' },
+    { key:'facility',      name:'⑥ 원 내부 시설 사진', where:'3번 화면 · 프리미엄 공간 소개 사진' },
+  ];
+  const LS_PREFIX = 'whaleImg:';
+  const MAX_SIDE = 1600;      // 업로드 시 긴 변 기준 자동 축소
+  const JPEG_QUALITY = 0.85;
+
+  const grid = document.getElementById('slotGrid');
+
+  function lsGet(key){ try{ return localStorage.getItem(LS_PREFIX+key) || ''; }catch(e){ return ''; } }
+  function lsSet(key, val){ localStorage.setItem(LS_PREFIX+key, val); }
+  function lsDel(key){ try{ localStorage.removeItem(LS_PREFIX+key); }catch(e){} }
+
+  function toast(msg, ms=2600){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._tm);
+    t._tm = setTimeout(()=>t.classList.remove('show'), ms);
+  }
+
+  // ===== 슬롯 카드 렌더링 =====
+  SLOTS.forEach(s=>{
+    const card = document.createElement('div');
+    card.className = 'slot';
+    card.innerHTML = `
+      <div class="preview" id="pv-${s.key}"></div>
+      <div class="body">
+        <h2>${s.name}</h2>
+        <div class="where">위치: ${s.where}</div>
+        <div class="file-key">images/${s.key}.jpg</div>
+        <div class="btn-row">
+          <label class="btn btn-blue" for="file-${s.key}">📷 이미지 올리기</label>
+          <input type="file" id="file-${s.key}" accept="image/*">
+          <button class="btn btn-line" id="dl-${s.key}">⬇ 파일로 저장</button>
+          <button class="btn btn-ghost" id="rm-${s.key}">기본으로 되돌리기</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+
+    document.getElementById('file-'+s.key).addEventListener('change', e=>{
+      const f = e.target.files[0];
+      if(f) uploadImage(s, f);
+      e.target.value = '';
+    });
+    document.getElementById('dl-'+s.key).addEventListener('click', ()=>downloadImage(s));
+    document.getElementById('rm-'+s.key).addEventListener('click', ()=>{
+      lsDel(s.key);
+      renderSlot(s);
+      updateUsage();
+      toast(`${s.name} — 기본 이미지로 되돌렸습니다.`);
+    });
+
+    renderSlot(s);
+  });
+  updateUsage();
+
+  // ===== 미리보기 =====
+  function renderSlot(s){
+    const pv = document.getElementById('pv-'+s.key);
+    const custom = lsGet(s.key);
+    if(custom){
+      pv.innerHTML = `<span class="tag custom">등록된 이미지 사용 중</span><img src="${custom}" alt="${s.name} 미리보기">`;
+      document.getElementById('dl-'+s.key).disabled = false;
+      return;
+    }
+    document.getElementById('dl-'+s.key).disabled = true;
+    // 기본(images 폴더) 이미지가 있으면 표시, 없으면 안내
+    pv.innerHTML = `<span class="tag default">기본 이미지</span>
+      <div class="empty">아직 등록된 이미지가 없어요.<br>[이미지 올리기]를 눌러 사진을 넣어 주세요.</div>`;
+    const exts = ['jpg','png','webp','jpeg'];
+    const img = new Image();
+    let i = 0;
+    img.onload = ()=>{ pv.querySelector('.empty')?.remove(); pv.appendChild(img); };
+    img.onerror = ()=>{ i++; if(i < exts.length) img.src = `images/${s.key}.${exts[i]}`; };
+    img.alt = s.name + ' 기본 이미지';
+    img.src = `images/${s.key}.${exts[0]}`;
+  }
+
+  // ===== 업로드 (자동 축소 후 저장) =====
+  function uploadImage(s, file){
+    if(!/^image\//.test(file.type) && !/\.(heic|heif)$/i.test(file.name)){
+      toast('이미지 파일만 올릴 수 있어요.'); return;
+    }
+    const reader = new FileReader();
+    reader.onerror = ()=>toast('파일을 읽지 못했어요. 다른 사진으로 시도해 주세요.');
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=>toast('이 사진 형식은 브라우저가 열 수 없어요. (아이폰 HEIC 사진은 JPG로 변환 후 올려 주세요)');
+      img.onload = ()=>{
+        const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); // PNG 투명 배경 대비
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+        try{
+          lsSet(s.key, dataUrl);
+        }catch(err){
+          toast('저장 공간이 부족해요. 다른 자리의 이미지를 [기본으로 되돌리기] 한 뒤 다시 시도해 주세요.', 4200);
+          return;
+        }
+        renderSlot(s);
+        updateUsage();
+        toast(`${s.name} 교체 완료! 홈페이지에 바로 반영됩니다. 🐋`);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ===== 파일로 저장 (images 폴더 배포용) =====
+  function downloadImage(s){
+    const data = lsGet(s.key);
+    if(!data){ toast('먼저 이미지를 올려 주세요.'); return; }
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = s.key + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast(`${s.key}.jpg 로 저장했어요. images 폴더에 넣으면 모든 기기에 적용됩니다.`, 4200);
+  }
+
+  // ===== 저장 공간 사용량 =====
+  function updateUsage(){
+    let bytes = 0;
+    SLOTS.forEach(s=>{ bytes += lsGet(s.key).length; });
+    const mb = bytes / 1024 / 1024;
+    const pct = Math.min(100, Math.round(mb / 4.5 * 100));
+    document.getElementById('usageBar').style.width = pct + '%';
+    document.getElementById('usageBar').style.background = pct > 85 ? 'var(--warn)' : 'var(--blue)';
+    document.getElementById('usageText').textContent = mb.toFixed(2) + 'MB / 약 5MB';
+  }
+</script>
+</body>
+</html>
